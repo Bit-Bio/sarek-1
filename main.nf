@@ -478,7 +478,7 @@ process BuildBWAindexes {
     """
 }
 
-ch_bwa = params.bwa ? Channel.value(file(params.bwa)) : bwa_built
+ch_bwa = params.bwa ? Channel.value([file(params.bwa + '.amb'), file(params.bwa + '.ann'), file(params.bwa + '.bwt'), file(params.bwa + '.pac'), file(params.bwa + '.sa')]) : bwa_built
 
 process BuildDict {
     tag "${fasta}"
