@@ -785,7 +785,7 @@ process FastQCFQ {
 
     output:
     	// Changed to remove { }
-        tuple file("iPEACE_CNTbc_01_1_R1_fastqc.html"), file("iPEACE_CNTbc_01_1_R1_fastqc.zip") into fastQCFQReport
+        tuple file("${idSample}_${idRun}_R1_fastqc.html"), file("${idSample}_${idRun}_R1_fastqc.zip"),  file("${idSample}_${idRun}_R2_fastqc.html"), file("${idSample}_${idRun}_R2_fastqc.zip") into fastQCFQReport
 
     when: !('fastqc' in skipQC)
 
