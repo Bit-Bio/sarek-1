@@ -784,7 +784,8 @@ process FastQCFQ {
         set idPatient, idSample, idRun, file("${idSample}_${idRun}_R1.fastq.gz"), file("${idSample}_${idRun}_R2.fastq.gz") from inputPairReadsFastQC
 
     output:
-        file("*.{html,zip}") into fastQCFQReport
+    	// Changed to remove { }
+        file("*.html"), file("*.zip") into fastQCFQReport
 
     when: !('fastqc' in skipQC)
 
