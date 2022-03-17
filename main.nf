@@ -785,7 +785,7 @@ process FastQCFQ {
 
     output:
     	// Changed to remove { }
-        file("*.html"), file("*.zip") into fastQCFQReport
+        tuple file("*.html"), file("*.zip") into fastQCFQReport
 
     when: !('fastqc' in skipQC)
 
