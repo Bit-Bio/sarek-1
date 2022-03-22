@@ -171,6 +171,8 @@ if (tsvPath) {
 
 ch_known_indels = Channel.empty()
 ch_known_indels = extractIndelFiles(params.known_indels)
+ch_known_indels_Sentieon = Channel.empty()
+ch_known_indels_Sentieon = extractIndelFiles(params.known_indels)
 
 /*
 ================================================================================
@@ -1568,7 +1570,7 @@ process Sentieon_BQSR {
         file(fasta) from ch_fasta
         file(dict) from ch_dict
         file(fastaFai) from ch_fai
-        file(knownIndels) from ch_known_indels
+        file(knownIndels) from ch_known_indels_Sentieon
         //file(knownIndelsIndex) from ch_known_indels_tbi
 
     output:
