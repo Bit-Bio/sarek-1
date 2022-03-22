@@ -576,27 +576,10 @@ process BuildGermlineResourceIndex {
 
 ch_germline_resource_tbi = params.germline_resource ? params.germline_resource_index ? Channel.value(file(params.germline_resource_index)) : germline_resource_tbi : "null"
 
-process BuildKnownIndelsIndex {
-    tag "${knownIndels}"
+//process BuildKnownIndelsIndex {}
 
-    publishDir params.outdir, mode: params.publish_dir_mode,
-        saveAs: {params.save_reference ? "reference_genome/${it}" : null }
 
-    input:
-        each file(knownIndels) from ch_known_indels
-
-    output:
-        file("${knownIndels}.tbi") into known_indels_tbi
-
-    when: !(params.known_indels_index) && params.known_indels && ('mapping' in step || 'preparerecalibration' in step)
-
-    script:
-    """
-    tabix -p vcf ${knownIndels}
-    """
-}
-
-ch_known_indels_tbi = params.known_indels ? params.known_indels_index ? Channel.value(file(params.known_indels_index)) : known_indels_tbi.collect() : "null"
+//ch_known_indels_tbi = params.known_indels ? params.known_indels_index ? Channel.value(file(params.known_indels_index)) : known_indels_tbi.collect() : "null"
 
 process BuildPonIndex {
     tag "${pon}"
@@ -1393,7 +1376,7 @@ process BaseRecalibrator {
         file(dict) from ch_dict
         file(fastaFai) from ch_fai
         file(knownIndels) from ch_known_indels
-        file(knownIndelsIndex) from ch_known_indels_tbi
+        //file(knownIndelsIndex) from ch_known_indels_tbi
 
     output:
         set idPatient, idSample, file("${prefix}${idSample}.recal.table") into tableGatherBQSRReports
@@ -1403,7 +1386,7 @@ process BaseRecalibrator {
 
     script:
     dbsnpOptions = params.dbsnp ? "--known-sites ${dbsnp}" : ""
-    knownOptions = params.known_indels ? knownIndels.collect{"--known-sites ${it}"}.join(' ') : ""
+    knownOptions = params.known_indels ? knownIndels[0].collect{"--known-sites ${it}"}.join(' ') : ""
     prefix = params.no_intervals ? "" : "${intervalBed.baseName}_"
     intervalsOptions = params.no_intervals ? "" : "-L ${intervalBed}"
     // TODO: --use-original-qualities ???
@@ -1586,7 +1569,7 @@ process Sentieon_BQSR {
         file(dict) from ch_dict
         file(fastaFai) from ch_fai
         file(knownIndels) from ch_known_indels
-        file(knownIndelsIndex) from ch_known_indels_tbi
+        //file(knownIndelsIndex) from ch_known_indels_tbi
 
     output:
         set idPatient, idSample, file("${idSample}.recal.bam"), file("${idSample}.recal.bam.bai") into bam_sentieon_recal
