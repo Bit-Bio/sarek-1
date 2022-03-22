@@ -169,6 +169,9 @@ if (tsvPath) {
 
 (genderMap, statusMap, inputSample) = extractInfos(inputSample)
 
+ch_known_indels = Channel.empty()
+ch_known_indels = extractIndelFiles(params.known_indels)
+
 /*
 ================================================================================
                                CHECKING REFERENCES
@@ -208,7 +211,9 @@ ch_fasta = params.fasta && !('annotate' in step) ? Channel.value(file(params.fas
 ch_fai = params.fasta_fai && !('annotate' in step) ? Channel.value(file(params.fasta_fai)) : "null"
 ch_germline_resource = params.germline_resource && 'mutect2' in tools ? Channel.value(file(params.germline_resource)) : "null"
 ch_intervals = params.intervals && !params.no_intervals && !('annotate' in step) ? Channel.value(file(params.intervals)) : "null"
-ch_known_indels = params.known_indels && ('mapping' in step || 'preparerecalibration' in step) ? Channel.value(file(params.known_indels)) : "null"
+// Changes here
+//ch_known_indels = params.known_indels && ('mapping' in step || 'preparerecalibration' in step) ? Channel.extractIndelFiles(params.known_indels, header:true) : "null"
+
 ch_mappability = params.mappability && 'controlfreec' in tools ? Channel.value(file(params.mappability)) : "null"
 
 // Initialize channels with values based on params
@@ -4200,6 +4205,18 @@ def extractFastq(tsvFile) {
             [idPatient, gender, status, idSample, idRun, file1, file2]
         }
 }
+
+def extractIndelFiles(csvFile) {
+	Channel.from(csvFile)
+		.splitCsv(sep: ',')
+		.map { row -> checkNumberOfItem(row, 2)
+			def vcfFile = row[0]
+			def vcfIndex = row[1]
+
+			return [vcfFile, vcfIndex]
+		}
+}
+
 
 // Channeling the TSV file containing mpileup
 // Format is: "subject gender status sample pileup"
