@@ -478,7 +478,7 @@ process BuildBWAindexes {
     """
 }
 
-ch_bwa = params.bwa ? Channel.value(file(params.bwa)) : bwa_built
+ch_bwa = params.bwa ? Channel.value([file(params.bwa + '.amb'), file(params.bwa + '.ann'), file(params.bwa + '.bwt'), file(params.bwa + '.pac'), file(params.bwa + '.sa')]) : bwa_built
 
 process BuildDict {
     tag "${fasta}"
@@ -784,7 +784,8 @@ process FastQCFQ {
         set idPatient, idSample, idRun, file("${idSample}_${idRun}_R1.fastq.gz"), file("${idSample}_${idRun}_R2.fastq.gz") from inputPairReadsFastQC
 
     output:
-        file("*.{html,zip}") into fastQCFQReport
+    	// Changed to remove { }
+        tuple file("${idSample}_${idRun}_R1_fastqc.html"), file("${idSample}_${idRun}_R1_fastqc.zip"),  file("${idSample}_${idRun}_R2_fastqc.html"), file("${idSample}_${idRun}_R2_fastqc.zip") into fastQCFQReport
 
     when: !('fastqc' in skipQC)
 
