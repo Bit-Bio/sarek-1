@@ -169,6 +169,9 @@ if (tsvPath) {
 
 (genderMap, statusMap, inputSample) = extractInfos(inputSample)
 
+ch_known_indels = Channel.empty()
+ch_known_indels = extractIndelFiles(params.known_indels)
+
 /*
 ================================================================================
                                CHECKING REFERENCES
@@ -209,7 +212,7 @@ ch_fai = params.fasta_fai && !('annotate' in step) ? Channel.value(file(params.f
 ch_germline_resource = params.germline_resource && 'mutect2' in tools ? Channel.value(file(params.germline_resource)) : "null"
 ch_intervals = params.intervals && !params.no_intervals && !('annotate' in step) ? Channel.value(file(params.intervals)) : "null"
 // Changes here
-ch_known_indels = params.known_indels && ('mapping' in step || 'preparerecalibration' in step) ? Channel.extractIndelFiles(params.known_indels, header:true) : "null"
+//ch_known_indels = params.known_indels && ('mapping' in step || 'preparerecalibration' in step) ? Channel.extractIndelFiles(params.known_indels, header:true) : "null"
 
 ch_mappability = params.mappability && 'controlfreec' in tools ? Channel.value(file(params.mappability)) : "null"
 
@@ -4212,7 +4215,6 @@ def extractIndelFiles(tsvFile) {
 
 			return [vcfFile, vcfIndex]
 		}
-
 }
 
 
