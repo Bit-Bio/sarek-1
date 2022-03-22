@@ -4206,8 +4206,8 @@ def extractFastq(tsvFile) {
         }
 }
 
-def extractIndelFiles(tsvFile) {
-	Channel.from(tsvFile)
+def extractIndelFiles(csvFile) {
+	Channel.from(csvFile)
 		.splitCsv(sep: ',')
 		.map { row -> checkNumberOfItem(row, 2)
 			def vcfFile = row[0]
