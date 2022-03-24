@@ -1388,7 +1388,7 @@ process BaseRecalibrator {
 
     script:
     dbsnpOptions = params.dbsnp ? "--known-sites ${dbsnp}" : ""
-    knownOptions = params.known_indels ? knownIndels[0].collect{"--known-sites ${it}"}.join(' ') : ""
+    knownOptions = params.known_indels ? knownIndels.collect{"--known-sites ${it}"}.join(' ') : ""
     prefix = params.no_intervals ? "" : "${intervalBed.baseName}_"
     intervalsOptions = params.no_intervals ? "" : "-L ${intervalBed}"
     // TODO: --use-original-qualities ???
