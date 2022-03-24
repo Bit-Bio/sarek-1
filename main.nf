@@ -170,13 +170,13 @@ if (tsvPath) {
 (genderMap, statusMap, inputSample) = extractInfos(inputSample)
 
 ch_known_indels = Channel.empty()
-ch_known_indels = extractIndelFiles(params.known_indels)
+ch_known_indels = extractIndelFiles(file(params.known_indels))
 
 ch_known_indels_view = Channel.empty()
-ch_known_indels_view = extractIndelFiles(params.known_indels)
+ch_known_indels_view = extractIndelFiles(file(params.known_indels))
 ch_known_indels_view.view()
 ch_known_indels_Sentieon = Channel.empty()
-ch_known_indels_Sentieon = extractIndelFiles(params.known_indels)
+ch_known_indels_Sentieon = extractIndelFiles(file(params.known_indels))
 
 /*
 ================================================================================
