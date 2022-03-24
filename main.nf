@@ -4199,10 +4199,10 @@ def extractIndelFiles(csvFile) {
 	Channel.from(csvFile)
 		.splitCsv(sep: '\t')
 		.map { row ->
-			def vcfFile = row[0]
-			def vcfIndex = row[1]
+			def vcfFile = returnFile(row[0])
+			def vcfIndex = returnFile(row[1])
 
-			return [vcfFile, vcfIndex]
+			[vcfFile, vcfIndex]
 		}
 }
 
