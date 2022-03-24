@@ -1378,7 +1378,7 @@ process BaseRecalibrator {
         file(fasta) from ch_fasta
         file(dict) from ch_dict
         file(fastaFai) from ch_fai
-        file(knownIndels) from ch_known_indels
+        set file(knownIndels), file(knownIndelsIndex) from ch_known_indels
         //file(knownIndelsIndex) from ch_known_indels_tbi
 
     output:
