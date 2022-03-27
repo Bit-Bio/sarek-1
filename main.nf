@@ -169,6 +169,15 @@ if (tsvPath) {
 
 (genderMap, statusMap, inputSample) = extractInfos(inputSample)
 
+ch_known_indels = Channel.empty()
+ch_known_indels = extractIndelFiles(file(params.known_indels))
+
+ch_known_indels_view = Channel.empty()
+ch_known_indels_view = extractIndelFiles(file(params.known_indels))
+ch_known_indels_view.view()
+ch_known_indels_Sentieon = Channel.empty()
+ch_known_indels_Sentieon = extractIndelFiles(file(params.known_indels))
+
 /*
 ================================================================================
                                CHECKING REFERENCES
@@ -208,7 +217,9 @@ ch_fasta = params.fasta && !('annotate' in step) ? Channel.value(file(params.fas
 ch_fai = params.fasta_fai && !('annotate' in step) ? Channel.value(file(params.fasta_fai)) : "null"
 ch_germline_resource = params.germline_resource && 'mutect2' in tools ? Channel.value(file(params.germline_resource)) : "null"
 ch_intervals = params.intervals && !params.no_intervals && !('annotate' in step) ? Channel.value(file(params.intervals)) : "null"
-ch_known_indels = params.known_indels && ('mapping' in step || 'preparerecalibration' in step) ? Channel.value(file(params.known_indels)) : "null"
+// Changes here
+//ch_known_indels = params.known_indels && ('mapping' in step || 'preparerecalibration' in step) ? Channel.extractIndelFiles(params.known_indels, header:true) : "null"
+
 ch_mappability = params.mappability && 'controlfreec' in tools ? Channel.value(file(params.mappability)) : "null"
 
 // Initialize channels with values based on params
@@ -571,27 +582,10 @@ process BuildGermlineResourceIndex {
 
 ch_germline_resource_tbi = params.germline_resource ? params.germline_resource_index ? Channel.value(file(params.germline_resource_index)) : germline_resource_tbi : "null"
 
-process BuildKnownIndelsIndex {
-    tag "${knownIndels}"
+//process BuildKnownIndelsIndex {}
 
-    publishDir params.outdir, mode: params.publish_dir_mode,
-        saveAs: {params.save_reference ? "reference_genome/${it}" : null }
 
-    input:
-        each file(knownIndels) from ch_known_indels
-
-    output:
-        file("${knownIndels}.tbi") into known_indels_tbi
-
-    when: !(params.known_indels_index) && params.known_indels && ('mapping' in step || 'preparerecalibration' in step)
-
-    script:
-    """
-    tabix -p vcf ${knownIndels}
-    """
-}
-
-ch_known_indels_tbi = params.known_indels ? params.known_indels_index ? Channel.value(file(params.known_indels_index)) : known_indels_tbi.collect() : "null"
+//ch_known_indels_tbi = params.known_indels ? params.known_indels_index ? Channel.value(file(params.known_indels_index)) : known_indels_tbi.collect() : "null"
 
 process BuildPonIndex {
     tag "${pon}"
@@ -1387,8 +1381,8 @@ process BaseRecalibrator {
         file(fasta) from ch_fasta
         file(dict) from ch_dict
         file(fastaFai) from ch_fai
-        file(knownIndels) from ch_known_indels
-        file(knownIndelsIndex) from ch_known_indels_tbi
+        set file(knownIndels), file(knownIndelsIndex) from ch_known_indels
+        //file(knownIndelsIndex) from ch_known_indels_tbi
 
     output:
         set idPatient, idSample, file("${prefix}${idSample}.recal.table") into tableGatherBQSRReports
@@ -1398,7 +1392,7 @@ process BaseRecalibrator {
 
     script:
     dbsnpOptions = params.dbsnp ? "--known-sites ${dbsnp}" : ""
-    knownOptions = params.known_indels ? knownIndels.collect{"--known-sites ${it}"}.join(' ') : ""
+    knownOptions = "" //params.known_indels ? knownIndels.collect{"--known-sites ${it}"}.join(' ') : ""
     prefix = params.no_intervals ? "" : "${intervalBed.baseName}_"
     intervalsOptions = params.no_intervals ? "" : "-L ${intervalBed}"
     // TODO: --use-original-qualities ???
@@ -1580,8 +1574,8 @@ process Sentieon_BQSR {
         file(fasta) from ch_fasta
         file(dict) from ch_dict
         file(fastaFai) from ch_fai
-        file(knownIndels) from ch_known_indels
-        file(knownIndelsIndex) from ch_known_indels_tbi
+        file(knownIndels) from ch_known_indels_Sentieon
+        //file(knownIndelsIndex) from ch_known_indels_tbi
 
     output:
         set idPatient, idSample, file("${idSample}.recal.bam"), file("${idSample}.recal.bam.bai") into bam_sentieon_recal
@@ -2429,6 +2423,7 @@ process ConcatVCF {
 
     output:
     // we have this funny *_* pattern to avoid copying the raw calls to publishdir
+    // Crash here
         set variantCaller, idPatient, idSample, file("*_*.vcf.gz"), file("*_*.vcf.gz.tbi") into vcfConcatenated
 
     when: ('haplotypecaller' in tools || 'freebayes' in tools)
@@ -4200,6 +4195,18 @@ def extractFastq(tsvFile) {
             [idPatient, gender, status, idSample, idRun, file1, file2]
         }
 }
+
+def extractIndelFiles(csvFile) {
+	Channel.from(csvFile)
+		.splitCsv(sep: '\t')
+		.map { row ->
+			def vcfFile = returnFile(row[0])
+			def vcfIndex = returnFile(row[1])
+
+			[vcfFile, vcfIndex]
+		}
+}
+
 
 // Channeling the TSV file containing mpileup
 // Format is: "subject gender status sample pileup"
