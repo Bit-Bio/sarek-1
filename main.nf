@@ -2423,6 +2423,7 @@ process ConcatVCF {
 
     output:
     // we have this funny *_* pattern to avoid copying the raw calls to publishdir
+    // Crash here
         set variantCaller, idPatient, idSample, file("*_*.vcf.gz"), file("*_*.vcf.gz.tbi") into vcfConcatenated
 
     when: ('haplotypecaller' in tools || 'freebayes' in tools)
