@@ -3487,7 +3487,7 @@ process BcftoolsStats {
         set variantCaller, idSample, file(vcf) from vcfBCFtools
 
     output:
-        file ("*.bcf.tools.stats.out") into bcftoolsReport
+        file ("${variantCaller}_${idSample}.bcf.tools.stats.out") into bcftoolsReport
 
     when: !('bcftools' in skipQC)
 
