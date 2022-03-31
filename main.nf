@@ -3510,7 +3510,7 @@ process Vcftools {
         set variantCaller, idSample, file(vcf) from vcfVCFtools
 
     output:
-        file ("${reduceVCF(vcf.fileName)}.*") into vcftoolsReport
+        set file ("${reduceVCF(vcf.fileName)}.FILTER.summary"), file ("${reduceVCF(vcf.fileName)}.TsTv.count"), file ("${reduceVCF(vcf.fileName)}.TsTv.qual"), file ("${reduceVCF(vcf.fileName)}.vcf.gz") into vcftoolsReport
 
     when: !('vcftools' in skipQC)
 
